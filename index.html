@@ -4,21 +4,32 @@
         <title>Hello World</title>
     </head>
     <script src="vendor/pixi.js"></script>
+    <script
+        src="https://unpkg.com/react@17/umd/react.development.js"
+        crossorigin
+    ></script>
+    <script
+        src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+        crossorigin
+    ></script>
     <body>
-        <script type="module">
-            import { App, Giraffe } from "./src/app.js";
+        <script type="module" type="text/babel">
+            import { App, Controls, Giraffe } from "./src/app.js";
             let type = "WebGL";
             if (!PIXI.utils.isWebGLSupported()) {
                 type = "canvas";
             }
-
+            const reactDiv = document.createElement("div");
+            reactDiv.id = "#react";
             PIXI.utils.sayHello(type);
             //Add the canvas that Pixi automatically created for you to the HTML document
             document.body.appendChild(App.view);
+            document.body.appendChild(reactDiv);
             Giraffe.Load().then(() => {
                 const g2 = new Giraffe(App.stage);
-                g2.show(App.screen.width / 2, App.screen.height / 2);
+                g2.addAtPos(App.screen.width / 2, App.screen.height / 2);
             });
+            ReactDOM.render(Controls(), reactDiv);
         </script>
     </body>
 </html>
