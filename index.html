@@ -6,7 +6,7 @@
     <script src="vendor/pixi.js"></script>
     <body>
         <script type="module">
-            import App from "./src/app.js";
+            import { App, Giraffe } from "./src/app.js";
             let type = "WebGL";
             if (!PIXI.utils.isWebGLSupported()) {
                 type = "canvas";
@@ -15,6 +15,10 @@
             PIXI.utils.sayHello(type);
             //Add the canvas that Pixi automatically created for you to the HTML document
             document.body.appendChild(App.view);
+            Giraffe.Load().then(() => {
+                const g2 = new Giraffe(App.stage);
+                g2.show(App.screen.width / 2, App.screen.height / 2);
+            });
         </script>
     </body>
 </html>
