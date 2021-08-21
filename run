@@ -1,0 +1,7 @@
+#!/bin/bash
+python -m SimpleHTTPServer 8000 &
+SERVER_PID=$!
+echo python server PID $SERVER_PID
+open http://localhost:8000/index.html
+trap "kill $SERVER_PID" EXIT
+wait
