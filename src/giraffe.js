@@ -26,7 +26,7 @@ export class Giraffe {
         this.body.addChild(this.legs);
         this.stage.addChild(this.body);
         this.body.pivot.set(0, 16);
-        this.body.scale.set(2, 2);
+        this.body.scale.set(1, 1);
     }
     reposition() {
         this.body.x = this.x;
