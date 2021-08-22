@@ -1,4 +1,6 @@
-import { makeSpriteFromLoadedResource } from "./pixi.js";
+import { Giraffe } from "./giraffe.js";
+import { loadAllResources, makeSpriteFromLoadedResource } from "./pixi.js";
+import { Tree } from "./tree.js";
 
 //Create a Pixi Application
 export const App = new PIXI.Application({
@@ -7,78 +9,49 @@ export const App = new PIXI.Application({
     antialias: true,
 });
 
-export class Giraffe {
-    static LoadPromise = null;
-    static async Load() {
-        if (this.LoadPromise !== null) {
-            return this.LoadPromise;
-        }
-        this.LoadPromise = new Promise((resolve, reject) => {
-            PIXI.Loader.shared
-                .add([
-                    "images/giraffe-whole.png",
-                    "images/giraffe-legs.png",
-                    "images/giraffe-head.png",
-                    "images/giraffe-neck.png",
-                ])
-                .load(resolve);
-        });
-        return this.LoadPromise;
-    }
-    constructor(stage) {
-        this.stage = stage;
-        this.neckLength = 16;
-    }
-    addAtPos(x, y) {
-        this.x = x;
-        this.y = y;
-        this.legs = makeSpriteFromLoadedResource("images/giraffe-legs.png");
-        this.neck = makeSpriteFromLoadedResource("images/giraffe-neck.png");
-        this.head = makeSpriteFromLoadedResource("images/giraffe-head.png");
-        this.head.x = x + 24;
-        this.head.y = y;
-        // this.head.y = y - headOffset;
-        const headHeight = 32;
-        this.head.width = 20;
-        this.head.height = headHeight;
-        this.neck.x = x + 18;
-        this.neck.y = y + headHeight;
-        // this.neck.y = y - neckOffset;
-        this.neck.width = 16;
-        this.neck.height = this.neckLength;
-        this.legs.x = x;
-        this.legs.y = y + headHeight + this.neckLength;
-        this.legs.width = 32;
-        this.legs.height = 32;
-        this.stage.addChild(this.head);
-        this.stage.addChild(this.neck);
-        this.stage.addChild(this.legs);
-    }
-    remove() {
-        this.stage.removeChild(this.legs);
-        this.stage.removeChild(this.neck);
-        this.stage.removeChild(this.head);
-    }
-    refresh() {
-        this.remove();
-        this.addAtPos(this.x, this.y);
-    }
-}
+await loadAllResources(
+    Giraffe.Resources(),
+    Tree.Resources()
+    // [
+    //     "images/tree-whole-big.png",
+    // ]
+);
+// const dbg = makeSpriteFromLoadedResource("images/tree-whole-big.png");
+// dbg.x = 200;
+// dbg.y = 200;
+// dbg.width = 32;
+// dbg.height = 32;
+// App.stage.addChild(dbg);
 
-await Giraffe.Load();
 const g1 = new Giraffe(App.stage);
-g1.addAtPos(App.screen.width / 4, App.screen.height / 4);
-
+const t1 = new Tree(App.stage);
+console.log(App.stage.height);
+g1.addAtPos(100, 100);
+t1.addAtPos(100, 400); //App.stage.height - 100);
+console.log("t1", t1);
+console.log(App.stage);
 const e = React.createElement;
 export function Controls() {
     return e("div", {}, [
-        "Neck length: ",
-        e("input", {
-            onChange: (val) => {
-                let neckLength = parseInt(val.currentTarget.value);
-                g1.neckLength = neckLength;
-                g1.refresh();
-            },
-        }),
+        e("div", {}, [
+            "Neck length: ",
+            e("input", {
+                onChange: (val) => {
+                    let neckLength = parseInt(val.currentTarget.value);
+                    g1.neckLength = neckLength;
+                    g1.reposition();
+                },
+            }),
+        ]),
+        e("div", {}, [
+            "Trunk length: ",
+            e("input", {
+                onChange: (val) => {
+                    let trunkLength = parseInt(val.currentTarget.value);
+                    t1.trunkLength = trunkLength;
+                    t1.reposition();
+                },
+            }),
+        ]),
     ]);
 }

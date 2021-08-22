@@ -14,7 +14,7 @@
     ></script>
     <body>
         <script type="module" type="text/babel">
-            import { App, Controls, Giraffe } from "./src/app.js";
+            import { App, Controls } from "./src/app.js";
             let type = "WebGL";
             if (!PIXI.utils.isWebGLSupported()) {
                 type = "canvas";
@@ -25,10 +25,6 @@
             //Add the canvas that Pixi automatically created for you to the HTML document
             document.body.appendChild(App.view);
             document.body.appendChild(reactDiv);
-            Giraffe.Load().then(() => {
-                const g2 = new Giraffe(App.stage);
-                g2.addAtPos(App.screen.width / 2, App.screen.height / 2);
-            });
             ReactDOM.render(Controls(), reactDiv);
         </script>
     </body>
