@@ -14,44 +14,43 @@ export class Tree {
         this.trunkLength = 16;
     }
     addAtPos(x, y) {
+        this.x = x;
+        this.y = y;
         this.base = makeSpriteFromLoadedResource("images/tree-base-256.png");
         this.trunk = makeSpriteFromLoadedResource("images/tree-trunk-256.png");
         this.canopy = makeSpriteFromLoadedResource(
             "images/tree-canopy-256.png"
         );
-        this.x = x;
-        this.y = y;
+        this.body = new PIXI.Container();
         this.reposition();
-        this.stage.addChild(this.canopy);
-        this.stage.addChild(this.trunk);
-        this.stage.addChild(this.base);
+        this.body.addChild(this.canopy);
+        this.body.addChild(this.trunk);
+        this.body.addChild(this.base);
+        this.stage.addChild(this.body);
+        this.body.pivot.set(0, 16);
+        this.body.scale.set(4, 4);
     }
     reposition() {
-        const scale = 2;
-        const x = this.x;
-        const y = this.y;
-        const canopyHeight = 12 * scale;
-        const trunkHeight = this.trunkLength * scale;
-        this.canopy.x = x;
-        this.canopy.y = y - canopyHeight - trunkHeight;
-        this.canopy.width = 32 * scale;
-        this.canopy.height = canopyHeight;
-        this.trunk.x = x + 13 * scale;
-        this.trunk.y = y - trunkHeight;
-        this.trunk.width = 4.5 * scale;
-        this.trunk.height = trunkHeight;
-        this.base.x = x + 9 * scale;
-        this.base.y = y;
-        this.base.width = 12 * scale;
-        this.base.height = 4 * scale;
+        this.body.x = this.x;
+        this.body.y = this.y;
+        this.base.x = 9;
+        this.base.y = 16;
+        this.base.width = 12;
+        this.base.height = 4;
+        this.base.anchor.set(0, 1);
+        this.trunk.x = 13;
+        this.trunk.y = 16 - this.base.height;
+        this.trunk.width = 4.5;
+        this.trunk.height = this.trunkLength;
+        this.trunk.anchor.set(0, 1);
+        this.canopy.x = 0;
+        this.canopy.y = 16 - this.base.height - this.trunkLength;
+        this.canopy.width = 32;
+        this.canopy.height = 12;
+        this.canopy.anchor.set(0, 1);
     }
     getCanopyRegion() {
-        return new PIXI.Rectangle(
-            this.canopy.x,
-            this.canopy.y,
-            this.canopy.width,
-            this.canopy.height
-        );
+        return this.canopy.getBounds();
     }
     remove() {
         this.stage.removeChild(this.base);

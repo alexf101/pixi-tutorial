@@ -19,8 +19,8 @@ class Game {
         this.t1 = new Tree(App.stage);
         this.a1 = new Apple(App.stage);
         console.log(App.stage.height);
-        this.g1.addAtPos(100, 100);
-        this.t1.addAtPos(100, App.view.height - 100);
+        this.g1.addAtPos(200, App.view.height - 20);
+        this.t1.addAtPos(100, App.view.height - 20);
         this.makeApples();
     }
     makeApples() {
@@ -32,6 +32,7 @@ class Game {
     }
 }
 const game = new Game();
+window.DBG_game = game;
 
 const e = React.createElement;
 export function Controls() {

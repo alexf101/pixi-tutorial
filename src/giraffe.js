@@ -19,27 +19,33 @@ export class Giraffe {
         this.legs = makeSpriteFromLoadedResource("images/giraffe-legs.png");
         this.neck = makeSpriteFromLoadedResource("images/giraffe-neck.png");
         this.head = makeSpriteFromLoadedResource("images/giraffe-head.png");
+        this.body = new PIXI.Container();
         this.reposition();
-        this.stage.addChild(this.head);
-        this.stage.addChild(this.neck);
-        this.stage.addChild(this.legs);
+        this.body.addChild(this.head);
+        this.body.addChild(this.neck);
+        this.body.addChild(this.legs);
+        this.stage.addChild(this.body);
+        this.body.pivot.set(0, 16);
+        this.body.scale.set(2, 2);
     }
     reposition() {
-        const x = this.x;
-        const y = this.y;
-        const headHeight = 32;
-        this.head.x = x + 24;
-        this.head.y = y - headHeight - this.neckLength;
-        this.head.width = 20;
-        this.head.height = headHeight;
-        this.neck.x = x + 18;
-        this.neck.y = y - this.neckLength;
-        this.neck.width = 16;
-        this.neck.height = this.neckLength;
-        this.legs.x = x;
-        this.legs.y = y;
+        this.body.x = this.x;
+        this.body.y = this.y;
+        this.legs.x = 0;
+        this.legs.y = 16;
         this.legs.width = 32;
         this.legs.height = 32;
+        this.legs.anchor.set(0, 1);
+        this.neck.x = 18;
+        this.neck.y = 16 - this.legs.height;
+        this.neck.width = 16;
+        this.neck.height = this.neckLength;
+        this.neck.anchor.set(0, 1);
+        this.head.x = 24;
+        this.head.y = 16 - this.legs.height - this.neckLength;
+        this.head.width = 20;
+        this.head.height = 32;
+        this.head.anchor.set(0, 1);
     }
     remove() {
         this.stage.removeChild(this.legs);
