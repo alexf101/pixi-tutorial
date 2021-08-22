@@ -1,6 +1,8 @@
 import { Giraffe } from "./giraffe.js";
 import { loadAllResources, makeSpriteFromLoadedResource } from "./pixi.js";
 import { Tree } from "./tree.js";
+import { Apple } from "./apple.js";
+import { getResources } from "./register.js";
 
 //Create a Pixi Application
 export const App = new PIXI.Application({
@@ -9,25 +11,15 @@ export const App = new PIXI.Application({
     antialias: true,
 });
 
-await loadAllResources(
-    Giraffe.Resources(),
-    Tree.Resources()
-    // [
-    //     "images/tree-whole-big.png",
-    // ]
-);
-// const dbg = makeSpriteFromLoadedResource("images/tree-whole-big.png");
-// dbg.x = 200;
-// dbg.y = 200;
-// dbg.width = 32;
-// dbg.height = 32;
-// App.stage.addChild(dbg);
+await loadAllResources(...getResources());
 
 const g1 = new Giraffe(App.stage);
 const t1 = new Tree(App.stage);
+const a1 = new Apple(App.stage);
 console.log(App.stage.height);
 g1.addAtPos(100, 100);
-t1.addAtPos(100, 400); //App.stage.height - 100);
+t1.addAtPos(100, App.view.height - 100);
+a1.addAtPos(100, App.view.height - 95);
 console.log("t1", t1);
 console.log(App.stage);
 const e = React.createElement;

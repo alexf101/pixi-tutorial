@@ -1,4 +1,5 @@
 import { makeSpriteFromLoadedResource } from "./pixi.js";
+import { registerResource } from "./register.js";
 
 export class Giraffe {
     static Resources() {
@@ -50,3 +51,4 @@ export class Giraffe {
         this.addAtPos(this.x, this.y);
     }
 }
+registerResource(Giraffe.Resources());

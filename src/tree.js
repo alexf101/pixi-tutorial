@@ -1,4 +1,5 @@
 import { makeSpriteFromLoadedResource } from "./pixi.js";
+import { registerResource } from "./register.js";
 
 export class Tree {
     static Resources() {
@@ -54,3 +55,4 @@ export class Tree {
         this.addAtPos(this.x, this.y);
     }
 }
+registerResource(Tree.Resources());
