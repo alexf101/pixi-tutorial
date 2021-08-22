@@ -13,15 +13,26 @@ export const App = new PIXI.Application({
 
 await loadAllResources(...getResources());
 
-const g1 = new Giraffe(App.stage);
-const t1 = new Tree(App.stage);
-const a1 = new Apple(App.stage);
-console.log(App.stage.height);
-g1.addAtPos(100, 100);
-t1.addAtPos(100, App.view.height - 100);
-a1.addAtPos(100, App.view.height - 95);
-console.log("t1", t1);
-console.log(App.stage);
+class Game {
+    constructor() {
+        this.g1 = new Giraffe(App.stage);
+        this.t1 = new Tree(App.stage);
+        this.a1 = new Apple(App.stage);
+        console.log(App.stage.height);
+        this.g1.addAtPos(100, 100);
+        this.t1.addAtPos(100, App.view.height - 100);
+        this.makeApples();
+    }
+    makeApples() {
+        const canopy = this.t1.getCanopyRegion();
+        this.a1.addAtPos(
+            canopy.x + canopy.width / 2,
+            canopy.y + canopy.height / 2
+        );
+    }
+}
+const game = new Game();
+
 const e = React.createElement;
 export function Controls() {
     return e("div", {}, [
@@ -30,8 +41,8 @@ export function Controls() {
             e("input", {
                 onChange: (val) => {
                     let neckLength = parseInt(val.currentTarget.value);
-                    g1.neckLength = neckLength;
-                    g1.reposition();
+                    game.g1.neckLength = neckLength;
+                    game.g1.reposition();
                 },
             }),
         ]),
@@ -40,8 +51,8 @@ export function Controls() {
             e("input", {
                 onChange: (val) => {
                     let trunkLength = parseInt(val.currentTarget.value);
-                    t1.trunkLength = trunkLength;
-                    t1.reposition();
+                    game.t1.trunkLength = trunkLength;
+                    game.t1.reposition();
                 },
             }),
         ]),

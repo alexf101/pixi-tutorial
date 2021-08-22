@@ -45,6 +45,14 @@ export class Tree {
         this.base.width = 12 * scale;
         this.base.height = 4 * scale;
     }
+    getCanopyRegion() {
+        return new PIXI.Rectangle(
+            this.canopy.x,
+            this.canopy.y,
+            this.canopy.width,
+            this.canopy.height
+        );
+    }
     remove() {
         this.stage.removeChild(this.base);
         this.stage.removeChild(this.trunk);

@@ -20,8 +20,8 @@ export class Apple {
         const y = this.y;
         this.apple.x = x;
         this.apple.y = y;
-        this.apple.width = 32;
-        this.apple.height = 32;
+        this.apple.scale.set(0.25, 0.25);
+        this.apple.anchor.set(0.5, 0.5);
     }
     remove() {
         this.stage.removeChild(this.apple);
