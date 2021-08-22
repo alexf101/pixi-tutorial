@@ -30,18 +30,18 @@ export class Tree {
         const scale = 2;
         const x = this.x;
         const y = this.y;
-        this.canopy.x = x;
-        this.canopy.y = y;
         const canopyHeight = 12 * scale;
+        const trunkHeight = this.trunkLength * scale;
+        this.canopy.x = x;
+        this.canopy.y = y - canopyHeight - trunkHeight;
         this.canopy.width = 32 * scale;
         this.canopy.height = canopyHeight;
         this.trunk.x = x + 13 * scale;
-        this.trunk.y = y + canopyHeight;
+        this.trunk.y = y - trunkHeight;
         this.trunk.width = 4.5 * scale;
-        const trunkHeight = this.trunkLength * scale;
         this.trunk.height = trunkHeight;
         this.base.x = x + 9 * scale;
-        this.base.y = y + canopyHeight + trunkHeight;
+        this.base.y = y;
         this.base.width = 12 * scale;
         this.base.height = 4 * scale;
     }

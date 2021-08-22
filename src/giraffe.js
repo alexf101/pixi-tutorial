@@ -27,17 +27,17 @@ export class Giraffe {
     reposition() {
         const x = this.x;
         const y = this.y;
-        this.head.x = x + 24;
-        this.head.y = y;
         const headHeight = 32;
+        this.head.x = x + 24;
+        this.head.y = y - headHeight - this.neckLength;
         this.head.width = 20;
         this.head.height = headHeight;
         this.neck.x = x + 18;
-        this.neck.y = y + headHeight;
+        this.neck.y = y - this.neckLength;
         this.neck.width = 16;
         this.neck.height = this.neckLength;
         this.legs.x = x;
-        this.legs.y = y + headHeight + this.neckLength;
+        this.legs.y = y;
         this.legs.width = 32;
         this.legs.height = 32;
     }
