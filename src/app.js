@@ -3,6 +3,7 @@ import { loadAllResources, makeSpriteFromLoadedResource } from "./pixi.js";
 import { Tree } from "./tree.js";
 import { Apple } from "./apple.js";
 import { getResources } from "./register.js";
+import { clamp, gameTimeToMilliseconds } from "./util.js";
 
 //Create a Pixi Application
 export const App = new PIXI.Application({
@@ -21,6 +22,8 @@ class Game {
         this.makeGiraffes();
         this.makeTrees();
         this.makeApples();
+        this.gameTime = 0;
+        this.ticker = App.ticker.add(this.tick.bind(this));
     }
     makeGiraffes() {
         for (let i = 0; i < 10; i++) {
@@ -44,22 +47,50 @@ class Game {
     }
     makeApples() {
         this.trees.forEach((tree) => {
-            const canopy = tree.getCanopyRegion();
             for (let i = 0; i < 12; i++) {
-                const apple = new Apple(App.stage);
-                this.apples.push(apple);
-
-                // Randomly distribute the apples in the inner regions of the canopy, not right at the edges - it looks better.
-                apple.addAtPos(
-                    canopy.x +
-                        Math.random() * canopy.width * 0.6 +
-                        canopy.width * 0.2,
-                    canopy.y +
-                        Math.random() * canopy.height * 0.6 +
-                        canopy.height * 0.2
-                );
+                this.addAppleToTree(tree);
             }
         });
+    }
+    addAppleToTree(tree) {
+        // Randomly distribute the apples in the inner regions of the canopy, not right at the edges - it looks better.
+        const apple = new Apple(App.stage);
+        this.apples.push(apple);
+        const canopy = tree.getCanopyRegion();
+        apple.addAtPos(
+            canopy.x + Math.random() * canopy.width * 0.6 + canopy.width * 0.2,
+            canopy.y + Math.random() * canopy.height * 0.6 + canopy.height * 0.2
+        );
+    }
+    tick(delta) {
+        this.gameTime += gameTimeToMilliseconds(delta);
+        // Apples spawn on each tree about once per second
+        this.trees.forEach((tree) => {
+            if (tree.getNextAppleTime() < this.gameTime) {
+                this.addAppleToTree(tree);
+                tree.resetAppleClock();
+            }
+        });
+        // Giraffes change direction randomly
+        this.giraffes.forEach((giraffe) => {
+            if (giraffe.getNextDirectionChangeTime() < this.gameTime) {
+                giraffe.changeDirection();
+                giraffe.resetChangeDirectionClock();
+            }
+        });
+        // Giraffes may move
+        this.giraffes.forEach((giraffe) => {
+            const newX = giraffe.body.x + giraffe.getDirection() * delta;
+            giraffe.body.x = clamp(
+                newX,
+                0,
+                App.view.width - giraffe.getBodyWidth()
+            );
+        });
+        // Game ends after 5 seconds (avoid crashing the tab!)
+        if (this.gameTime > 5000) {
+            this.ticker.stop();
+        }
     }
 }
 const game = new Game();

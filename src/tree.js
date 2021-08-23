@@ -12,6 +12,23 @@ export class Tree {
     constructor(stage) {
         this.stage = stage;
         this.trunkLength = 16;
+        this.resetAppleClock();
+    }
+    getBodyWidth() {
+        // Memoize this; apparently it's relatively expensive to calculate.
+        if (this._bodyWidth === undefined) {
+            this._bodyWidth = this.body.getBounds().width;
+        }
+        return this._bodyWidth;
+    }
+    getNextAppleTime() {
+        return this._nextAppleTime;
+    }
+    resetAppleClock() {
+        if (this._nextAppleTime === undefined) {
+            this._nextAppleTime = 0;
+        }
+        this._nextAppleTime += 1000 * (0.5 + Math.random());
     }
     addAtPos(x, y) {
         this.x = x;

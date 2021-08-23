@@ -1,6 +1,16 @@
 import { makeSpriteFromLoadedResource } from "./pixi.js";
 import { registerResource } from "./register.js";
 
+function pickRandomDirection() {
+    const r = Math.random();
+    if (r > 2 / 3) {
+        return 1;
+    } else if (r > 1 / 3) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
 export class Giraffe {
     static Resources() {
         return [
@@ -12,6 +22,32 @@ export class Giraffe {
     constructor(stage) {
         this.stage = stage;
         this.neckLength = 16;
+        this._nextDirectionChangeTime = 0;
+        this.resetChangeDirectionClock();
+        this.changeDirection();
+    }
+    getBodyWidth() {
+        // Memoize this; apparently it's relatively expensive to calculate.
+        if (this._bodyWidth === undefined) {
+            this._bodyWidth = this.body.getBounds().width;
+        }
+        return this._bodyWidth;
+    }
+    getDirection() {
+        return this._direction;
+    }
+    changeDirection() {
+        this._direction = pickRandomDirection();
+        console.log("this._direction: ", this._direction); // XX
+    }
+    resetChangeDirectionClock() {
+        if (this._nextDirectionChangeTime === undefined) {
+            this._nextDirectionChangeTime = 0;
+        }
+        this._nextDirectionChangeTime += 1000 * (2 + Math.random() * 3);
+    }
+    getNextDirectionChangeTime() {
+        return this._nextDirectionChangeTime;
     }
     addAtPos(x, y) {
         this.x = x;
