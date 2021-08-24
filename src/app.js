@@ -101,8 +101,8 @@ class Game {
                 App.view.width - giraffe.getBodyWidth()
             );
         });
-        // Game ends after 5 seconds (avoid crashing the tab!)
-        if (this.gameTime > 5000) {
+        // Game ends after 25 seconds (avoid crashing the tab!)
+        if (this.gameTime > 25000) {
             this.ticker.stop();
         }
     }

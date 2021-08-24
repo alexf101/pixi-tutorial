@@ -34,6 +34,7 @@ export class Tree {
             this.dragStartY = ev.data.getLocalPosition(this.body).y;
             this.origTrunkLength = this.trunkLength;
         });
+        // Note that mousemove in PIXI will fire for any movement over the world, not just the canopy.
         this.canopy.on("mousemove", (ev) => {
             if (this.dragging) {
                 this.trunkLength =
@@ -43,7 +44,7 @@ export class Tree {
             }
         });
         this.canopy.on("mouseup", () => (this.dragging = false));
-        this.canopy.on("mouseout", () => (this.dragging = false));
+        this.canopy.on("mouseupoutside", () => (this.dragging = false));
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
