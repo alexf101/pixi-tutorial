@@ -39,6 +39,7 @@ class Game {
     makeTrees() {
         for (let i = 0; i < 6; i++) {
             const tree = new Tree(App.stage);
+            tree.makeDraggable();
             this.trees.push(tree);
             tree.addAtPos(
                 Math.random() * (App.view.width - tree.getBodyWidth()),

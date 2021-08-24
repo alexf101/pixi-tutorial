@@ -28,6 +28,8 @@ export class Tree {
         this.body.addChild(this.base);
         this.body.pivot.set(0, 16);
         this.body.scale.set(4, 4);
+    }
+    makeDraggable() {
         this.canopy.interactive = true;
         this.canopy.cursor = "grab";
         this.canopy.on("mousedown", (ev) => {
