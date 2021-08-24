@@ -25,6 +25,18 @@ export class Giraffe {
         this._nextDirectionChangeTime = 0;
         this.resetChangeDirectionClock();
         this.changeDirection();
+        this.legs = makeSpriteFromLoadedResource("images/giraffe-legs.png");
+        this.neck = makeSpriteFromLoadedResource("images/giraffe-neck.png");
+        this.head = makeSpriteFromLoadedResource("images/giraffe-head.png");
+        this.body = new PIXI.Container();
+        this.x = 0;
+        this.y = 0;
+        this.reposition();
+        this.body.addChild(this.head);
+        this.body.addChild(this.neck);
+        this.body.addChild(this.legs);
+        this.body.pivot.set(0, 16);
+        this.body.scale.set(1, 1);
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
@@ -38,7 +50,6 @@ export class Giraffe {
     }
     changeDirection() {
         this._direction = pickRandomDirection();
-        console.log("this._direction: ", this._direction); // XX
     }
     resetChangeDirectionClock() {
         if (this._nextDirectionChangeTime === undefined) {
@@ -52,17 +63,8 @@ export class Giraffe {
     addAtPos(x, y) {
         this.x = x;
         this.y = y;
-        this.legs = makeSpriteFromLoadedResource("images/giraffe-legs.png");
-        this.neck = makeSpriteFromLoadedResource("images/giraffe-neck.png");
-        this.head = makeSpriteFromLoadedResource("images/giraffe-head.png");
-        this.body = new PIXI.Container();
         this.reposition();
-        this.body.addChild(this.head);
-        this.body.addChild(this.neck);
-        this.body.addChild(this.legs);
         this.stage.addChild(this.body);
-        this.body.pivot.set(0, 16);
-        this.body.scale.set(1, 1);
     }
     reposition() {
         this.body.x = this.x;

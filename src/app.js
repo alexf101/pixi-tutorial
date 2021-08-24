@@ -22,6 +22,7 @@ class Game {
         this.makeGiraffes();
         this.makeTrees();
         this.makeApples();
+        this.makeGreatTree();
         this.gameTime = 0;
         this.ticker = App.ticker.add(this.tick.bind(this));
     }
@@ -30,7 +31,7 @@ class Game {
             const giraffe = new Giraffe(App.stage);
             this.giraffes.push(giraffe);
             giraffe.addAtPos(
-                Math.random() * (App.view.width - 64), // I think giraffe's are 44 px wide, but... let's give it some extra space.
+                Math.random() * (App.view.width - giraffe.getBodyWidth()),
                 App.view.height - 20
             );
         }
@@ -40,9 +41,22 @@ class Game {
             const tree = new Tree(App.stage);
             this.trees.push(tree);
             tree.addAtPos(
-                Math.random() * (App.view.width - 128), // tree canopy width is 128
+                Math.random() * (App.view.width - tree.getBodyWidth()),
                 App.view.height - 20
             );
+        }
+    }
+    makeGreatTree() {
+        const tree = new Tree(App.stage);
+        tree.body.scale.set(6, 6);
+        tree.trunkLength = 50;
+        this.trees.push(tree);
+        tree.addAtPos(
+            (App.view.width - tree.getBodyWidth()) / 2,
+            App.view.height - 20
+        );
+        for (let i = 0; i < 18; i++) {
+            this.addAppleToTree(tree);
         }
     }
     makeApples() {

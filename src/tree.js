@@ -13,6 +13,20 @@ export class Tree {
         this.stage = stage;
         this.trunkLength = 16;
         this.resetAppleClock();
+        this.base = makeSpriteFromLoadedResource("images/tree-base-256.png");
+        this.trunk = makeSpriteFromLoadedResource("images/tree-trunk-256.png");
+        this.canopy = makeSpriteFromLoadedResource(
+            "images/tree-canopy-256.png"
+        );
+        this.body = new PIXI.Container();
+        this.x = 0;
+        this.y = 0;
+        this.reposition();
+        this.body.addChild(this.canopy);
+        this.body.addChild(this.trunk);
+        this.body.addChild(this.base);
+        this.body.pivot.set(0, 16);
+        this.body.scale.set(4, 4);
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
@@ -33,19 +47,8 @@ export class Tree {
     addAtPos(x, y) {
         this.x = x;
         this.y = y;
-        this.base = makeSpriteFromLoadedResource("images/tree-base-256.png");
-        this.trunk = makeSpriteFromLoadedResource("images/tree-trunk-256.png");
-        this.canopy = makeSpriteFromLoadedResource(
-            "images/tree-canopy-256.png"
-        );
-        this.body = new PIXI.Container();
         this.reposition();
-        this.body.addChild(this.canopy);
-        this.body.addChild(this.trunk);
-        this.body.addChild(this.base);
         this.stage.addChild(this.body);
-        this.body.pivot.set(0, 16);
-        this.body.scale.set(4, 4);
     }
     reposition() {
         this.body.x = this.x;
