@@ -21,6 +21,7 @@ export class Tree {
         this.body = new PIXI.Container();
         this.x = 0;
         this.y = 0;
+        this.apples = [];
         this.reposition();
         this.body.addChild(this.canopy);
         this.body.addChild(this.trunk);
@@ -62,6 +63,23 @@ export class Tree {
         }
         this._nextAppleTime += 1000 * (0.5 + Math.random());
     }
+    // Adds an apple to the canopy, and keeps it there if the canopy moves.
+    addApple(apple) {
+        const canopyGlobalCoords = this.getCanopyRegion();
+        apple.canopyOffsetY =
+            Math.random() * canopyGlobalCoords.height * 0.6 +
+            canopyGlobalCoords.height * 0.2;
+        apple.canopyOffsetX =
+            Math.random() * canopyGlobalCoords.width * 0.6 +
+            canopyGlobalCoords.width * 0.2;
+        this.positionApple(apple, canopyGlobalCoords);
+        apple.addAtPos(apple.x, apple.y);
+        this.apples.push(apple);
+    }
+    positionApple(apple, canopyGlobalCoords) {
+        apple.body.x = canopyGlobalCoords.x + apple.canopyOffsetX;
+        apple.body.y = canopyGlobalCoords.y + apple.canopyOffsetY;
+    }
     addAtPos(x, y) {
         this.x = x;
         this.y = y;
@@ -86,6 +104,10 @@ export class Tree {
         this.canopy.width = 32;
         this.canopy.height = 12;
         this.canopy.anchor.set(0, 1);
+        this.apples.forEach((apple) => {
+            const canopyGlobalCoords = this.getCanopyRegion();
+            this.positionApple(apple, canopyGlobalCoords);
+        });
     }
     getCanopyRegion() {
         return this.canopy.getBounds();

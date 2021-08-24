@@ -7,24 +7,24 @@ export class Apple {
     }
     constructor(stage) {
         this.stage = stage;
+        this.body = makeSpriteFromLoadedResource("images/apple-64.png");
+        this.reposition();
     }
     addAtPos(x, y) {
-        this.apple = makeSpriteFromLoadedResource("images/apple-64.png");
         this.x = x;
         this.y = y;
-        this.reposition();
-        this.stage.addChild(this.apple);
+        this.stage.addChild(this.body);
     }
     reposition() {
         const x = this.x;
         const y = this.y;
-        this.apple.x = x;
-        this.apple.y = y;
-        this.apple.scale.set(0.25, 0.25);
-        this.apple.anchor.set(0.5, 0.5);
+        this.body.x = x;
+        this.body.y = y;
+        this.body.scale.set(0.25, 0.25);
+        this.body.anchor.set(0.5, 0.5);
     }
     remove() {
-        this.stage.removeChild(this.apple);
+        this.stage.removeChild(this.body);
     }
     refresh() {
         this.remove();

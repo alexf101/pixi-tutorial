@@ -70,11 +70,7 @@ class Game {
         // Randomly distribute the apples in the inner regions of the canopy, not right at the edges - it looks better.
         const apple = new Apple(App.stage);
         this.apples.push(apple);
-        const canopy = tree.getCanopyRegion();
-        apple.addAtPos(
-            canopy.x + Math.random() * canopy.width * 0.6 + canopy.width * 0.2,
-            canopy.y + Math.random() * canopy.height * 0.6 + canopy.height * 0.2
-        );
+        tree.addApple(apple);
     }
     tick(delta) {
         this.gameTime += gameTimeToMilliseconds(delta);
