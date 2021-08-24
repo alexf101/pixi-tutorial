@@ -27,6 +27,23 @@ export class Tree {
         this.body.addChild(this.base);
         this.body.pivot.set(0, 16);
         this.body.scale.set(4, 4);
+        this.canopy.interactive = true;
+        this.canopy.cursor = "grab";
+        this.canopy.on("mousedown", (ev) => {
+            this.dragging = true;
+            this.dragStartY = ev.data.getLocalPosition(this.body).y;
+            this.origTrunkLength = this.trunkLength;
+        });
+        this.canopy.on("mousemove", (ev) => {
+            if (this.dragging) {
+                this.trunkLength =
+                    this.origTrunkLength +
+                    (this.dragStartY - ev.data.getLocalPosition(this.body).y);
+                this.reposition();
+            }
+        });
+        this.canopy.on("mouseup", () => (this.dragging = false));
+        this.canopy.on("mouseout", () => (this.dragging = false));
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
