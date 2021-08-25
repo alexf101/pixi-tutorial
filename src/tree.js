@@ -36,18 +36,26 @@ export class Tree {
             this.dragging = true;
             this.dragStartY = ev.data.getLocalPosition(this.body).y;
             this.origTrunkLength = this.trunkLength;
+            const mouseMoveHandler = (ev) => {
+                if (this.dragging) {
+                    this.trunkLength =
+                        this.origTrunkLength +
+                        (this.dragStartY -
+                            ev.data.getLocalPosition(this.body).y);
+                    this.reposition();
+                }
+            };
+            // Note that mousemove in PIXI will fire for any movement over the world, not just the canopy.
+            this.canopy.on("mousemove", mouseMoveHandler);
+            const mouseUpHandler = () => {
+                this.dragging = false;
+                this.canopy.off("mousemove", mouseMoveHandler);
+                this.canopy.off("mouseup", mouseUpHandler);
+                this.canopy.off("mouseupoutside", mouseUpHandler);
+            };
+            this.canopy.on("mouseup", mouseUpHandler);
+            this.canopy.on("mouseupoutside", mouseUpHandler);
         });
-        // Note that mousemove in PIXI will fire for any movement over the world, not just the canopy.
-        this.canopy.on("mousemove", (ev) => {
-            if (this.dragging) {
-                this.trunkLength =
-                    this.origTrunkLength +
-                    (this.dragStartY - ev.data.getLocalPosition(this.body).y);
-                this.reposition();
-            }
-        });
-        this.canopy.on("mouseup", () => (this.dragging = false));
-        this.canopy.on("mouseupoutside", () => (this.dragging = false));
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
