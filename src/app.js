@@ -3,7 +3,7 @@ import { loadAllResources, makeSpriteFromLoadedResource } from "./pixi.js";
 import { Tree } from "./tree.js";
 import { Apple } from "./apple.js";
 import { getResources } from "./register.js";
-import { clamp, gameTimeToMilliseconds } from "./util.js";
+import { clamp, gameTimeToMilliseconds, hitTestRectangle } from "./util.js";
 
 //Create a Pixi Application
 export const App = new PIXI.Application({
@@ -97,6 +97,20 @@ class Game {
                 0,
                 App.view.width - giraffe.getBodyWidth()
             );
+        });
+        // Apple/giraffe collisions result in the giraffe eating the apple
+        // Let's start with the naive O(n^2) algorithm and see how far we get
+        this.giraffes.forEach((giraffe) => {
+            this.apples.forEach((apple) => {
+                if (
+                    hitTestRectangle(
+                        giraffe.head.getBounds(),
+                        apple.body.getBounds()
+                    )
+                ) {
+                    apple.remove();
+                }
+            });
         });
         // Game ends after 25 seconds (avoid crashing the tab!)
         if (this.gameTime > 25000) {
