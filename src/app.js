@@ -107,11 +107,12 @@ class Game {
             }
             // Giraffes may move
             const newX = giraffe.body.x + giraffe.getDirection() * frames;
-            giraffe.body.x = clamp(
-                newX,
-                0,
-                App.view.width - giraffe.getBodyWidth()
-            );
+            giraffe.x = clamp(newX, 0, App.view.width - giraffe.getBodyWidth());
+            giraffe.reposition();
+            // Giraffes may grow weakened by hunger
+            if (giraffe.getSicklyTime() < this.gameTime) {
+                giraffe.onSickly();
+            }
             // Giraffes may starve
             if (giraffe.getStarvationTime() < this.gameTime) {
                 giraffe.onStarve();

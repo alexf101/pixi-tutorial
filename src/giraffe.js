@@ -41,6 +41,7 @@ export class Giraffe {
     }
     onEat(gameTime) {
         this.resetEatClock(gameTime);
+        this.onRecover();
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
@@ -65,11 +66,22 @@ export class Giraffe {
         if (this._starvationTime === undefined) {
             this._starvationTime = 0;
         }
-        this._starvationTime = gameTime + 4000 * Math.random(); //8000 +
+        this._starvationTime = gameTime + 8000 + 4000 * Math.random();
         this._sicklyTime = this._starvationTime * (2 / 3);
     }
     getStarvationTime() {
         return this._starvationTime;
+    }
+    getSicklyTime() {
+        return this._sicklyTime;
+    }
+    onSickly() {
+        this._sickly = true;
+        this.reposition();
+    }
+    onRecover() {
+        this._sickly = false;
+        this.reposition();
     }
     onStarve() {
         this.body.rotation = Math.PI * 1.5;
@@ -105,6 +117,15 @@ export class Giraffe {
         this.head.width = 20;
         this.head.height = 32;
         this.head.anchor.set(0, 1);
+        if (this._sickly) {
+            this.head.tint = 0xff0000;
+            this.legs.tint = 0xff0000;
+            this.neck.tint = 0xff0000;
+        } else {
+            this.head.tint = 0xffffff;
+            this.legs.tint = 0xffffff;
+            this.neck.tint = 0xffffff;
+        }
     }
     remove() {
         this.stage.removeChild(this.body);
