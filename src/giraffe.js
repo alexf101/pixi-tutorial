@@ -19,11 +19,12 @@ export class Giraffe {
             "images/giraffe-neck.png",
         ];
     }
-    constructor(stage) {
+    constructor(stage, gameTime) {
         this.stage = stage;
         this.neckLength = 16;
-        this.resetEatClock(0);
+        this.resetEatClock(gameTime);
         this._nextDirectionChangeTime = 0;
+        this._applesConsumed = 0;
         this.resetChangeDirectionClock();
         this.changeDirection();
         this.legs = makeSpriteFromLoadedResource("images/giraffe-legs.png");
@@ -42,6 +43,10 @@ export class Giraffe {
     onEat(gameTime) {
         this.resetEatClock(gameTime);
         this.onRecover();
+        this._applesConsumed += 1;
+        if (this._applesConsumed === 3) {
+            this.mitosis(gameTime);
+        }
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
@@ -55,6 +60,12 @@ export class Giraffe {
     }
     changeDirection() {
         this._direction = pickRandomDirection();
+    }
+    setDirection(direction) {
+        if (!Math.abs(direction) === 1) {
+            throw new Error("Invalid direction");
+        }
+        this._direction = direction;
     }
     resetChangeDirectionClock() {
         if (this._nextDirectionChangeTime === undefined) {
@@ -86,6 +97,17 @@ export class Giraffe {
     onStarve() {
         this.body.rotation = Math.PI * 1.5;
         setTimeout(this.remove.bind(this), 2000);
+    }
+    mitosis(gameTime) {
+        // When undergoing mitosis, the Giraffe will not move and will change colour
+        this._mitosis = true;
+        this._mitosisCompleteAt = gameTime + 2000;
+    }
+    isUndergoingMitosis() {
+        return !!this._mitosis;
+    }
+    mitosisComplete(gameTime) {
+        return this._mitosisCompleteAt < gameTime;
     }
     getNextDirectionChangeTime() {
         return this._nextDirectionChangeTime;
@@ -121,6 +143,10 @@ export class Giraffe {
             this.head.tint = 0xff0000;
             this.legs.tint = 0xff0000;
             this.neck.tint = 0xff0000;
+        } else if (this._mitosis) {
+            this.head.tint = 0x00ff00;
+            this.legs.tint = 0x00ff00;
+            this.neck.tint = 0x00ff00;
         } else {
             this.head.tint = 0xffffff;
             this.legs.tint = 0xffffff;

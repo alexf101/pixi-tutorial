@@ -24,11 +24,12 @@ class Game {
         this.makeApples();
         this.makeGreatTree();
         this.gameTime = 0;
+        this.gameSpeedMultipler = 1;
         this.ticker = App.ticker.add(this.tick.bind(this));
     }
     makeGiraffes() {
         for (let i = 0; i < 10; i++) {
-            const giraffe = new Giraffe(App.stage);
+            const giraffe = new Giraffe(App.stage, this.gameTime);
             this.giraffes.push(giraffe);
             giraffe.addAtPos(
                 Math.random() * (App.view.width - giraffe.getBodyWidth()),
@@ -49,6 +50,7 @@ class Game {
     }
     makeGreatTree() {
         const tree = new Tree(App.stage);
+        tree.onAppleEatenHook = () => (this.win = true);
         tree.body.scale.set(6, 6);
         tree.trunkLength = 50;
         this.trees.push(tree);
@@ -74,35 +76,114 @@ class Game {
         tree.addApple(apple);
     }
     tick(frames) {
+        frames = frames * this.gameSpeedMultipler;
         this.gameTime += gameTimeToMilliseconds(frames);
-        document.getElementById("fps-meter").textContent =
-            "FPS: " + Math.round(frames * 60);
-        document.getElementById("game-time").textContent =
-            "Game time: " + Math.round(this.gameTime);
-        document.getElementById("giraffe-debug").textContent =
-            "Giraffes: " +
-            JSON.stringify(
-                this.giraffes.map(
-                    (g) => `Starves at ${Math.round(g.getStarvationTime())}`
-                ),
-                null,
-                2
-            );
+        try {
+            document.getElementById("fps-meter").textContent =
+                "FPS: " + Math.round(frames * 60);
+            document.getElementById("game-time").textContent =
+                "Game time: " + Math.round(this.gameTime);
+            document.getElementById("giraffe-debug").textContent =
+                "Giraffes: " +
+                JSON.stringify(
+                    this.giraffes.map(
+                        (g) =>
+                            `Starves at ${Math.round(
+                                g.getStarvationTime()
+                            )}. Apples eaten: ${g._applesConsumed}`
+                    ),
+                    null,
+                    2
+                );
+        } catch (err) {
+            console.log(err);
+        }
+        if (this.win) {
+            let text = new PIXI.Text("Congratulations! You win! :)", {
+                fontFamily: "Arial",
+                fontSize: 24,
+                fill: 0xffff10,
+                align: "center",
+            });
+            text.x = (App.view.width - text.width) / 2;
+            text.y = text.height;
+            App.stage.addChild(text);
+            this.ticker.stop();
+            // setTimeout(() => this.ticker.stop(), 1);
+        }
         // Apples spawn on each tree about once per second
         this.trees.forEach((tree) => {
             if (tree.getNextAppleTime() < this.gameTime) {
                 this.addAppleToTree(tree);
                 tree.resetAppleClock();
             }
+            // memoize the bounds, this is for some reason a little expensive for Pixi to calculate. We know they're not going to change within this tick, and we'll need them a bunch of times.
+            tree._canopyBounds = tree.getCanopyRegion();
         });
-        // Giraffe-only rules
+        const _appleBounds = new Map();
         this.giraffes.forEach((giraffe) => {
             if (giraffe.dead) {
                 return;
             }
-            // Giraffes change direction randomly
+            if (giraffe.mitosisComplete(this.gameTime)) {
+                // Mutating things while iterating them makes me queasy. Let's do it after instead.
+                setTimeout(() => {
+                    for (let i = 0; i < 2; i++) {
+                        const giraffeChild = new Giraffe(
+                            App.stage,
+                            this.gameTime
+                        );
+                        giraffeChild.neckLength =
+                            giraffe.neckLength + 30 * (Math.random() - 0.5);
+                        giraffeChild.addAtPos(giraffe.x, giraffe.y);
+                        giraffe.setDirection(2 * (i % 2) - 1);
+                        this.giraffes.push(giraffeChild);
+                    }
+                });
+                giraffe.remove();
+                giraffe.dead = true;
+            }
+            if (giraffe.isUndergoingMitosis()) {
+                return;
+            }
+            const giraffeBounds = giraffe.getHeadRegion();
+            // Giraffes change direction ~randomly~ towards the nearest tree canopy at their neck height
             if (giraffe.getNextDirectionChangeTime() < this.gameTime) {
-                giraffe.changeDirection();
+                // giraffe.changeDirection();
+                // There's really not that many trees, this should be fine.
+                let closestTree = { tree: null, distBetweenCenters: 1000 };
+                this.trees.forEach((tree) => {
+                    if (
+                        giraffeBounds.y + giraffeBounds.height >
+                            tree._canopyBounds.y &&
+                        giraffeBounds.y <
+                            tree._canopyBounds.y + tree._canopyBounds.height
+                    ) {
+                        let distBetweenCenters = Math.abs(
+                            giraffeBounds.x +
+                                giraffeBounds.width / 2 -
+                                (tree._canopyBounds.x +
+                                    tree._canopyBounds.width / 2)
+                        );
+                        if (
+                            distBetweenCenters < closestTree.distBetweenCenters
+                        ) {
+                            closestTree = { tree, distBetweenCenters };
+                        }
+                    }
+                });
+                if (closestTree.tree !== null) {
+                    giraffe.setDirection(
+                        closestTree.tree._canopyBounds.x +
+                            closestTree.tree._canopyBounds.width / 2 >
+                            giraffeBounds.x + giraffeBounds.width / 2
+                            ? 1
+                            : -1
+                    );
+                } else {
+                    // There's no trees. Oh well. Choose at will.
+                    giraffe.changeDirection();
+                }
                 giraffe.resetChangeDirectionClock();
             }
             // Giraffes may move
@@ -120,17 +201,10 @@ class Game {
                 // There shouldn't be so many of them that it causes a problem, though it is a memory leak.
                 giraffe.dead = true;
             }
-        });
-        // Apple/giraffe collisions result in the giraffe eating the apple
-        // We can improve slightly upon the naive O(n^2) algorithm by comparing giraffes with tree canopies instead of apples as a first pass.
-
-        // memoize the bounds, this is for some reason a little expensive for Pixi to calculate. We know they're not going to change within this tick.
-        this.trees.forEach(
-            (tree) => (tree._canopyBounds = tree.getCanopyRegion())
-        );
-        const _appleBounds = new Map();
-        this.giraffes.forEach((giraffe) => {
-            const giraffeBounds = giraffe.getHeadRegion();
+            // Apple/giraffe collisions result in the giraffe eating the apple
+            // We can improve slightly upon the naive O(n^2) algorithm by comparing giraffes with tree canopies instead of apples as a first pass.
+            // Giraffes can't eat more than one apple on a single tick.
+            giraffe._eatenThisTick = false;
             this.trees.forEach((tree) => {
                 if (hitTestRectangle(giraffeBounds, tree._canopyBounds)) {
                     tree.getApples().forEach((apple) => {
@@ -143,17 +217,20 @@ class Game {
                                 _appleBounds.get(apple)
                             )
                         ) {
-                            apple.onEaten();
-                            tree.onEaten(apple);
-                            giraffe.onEat(this.gameTime);
-                            this.apples.delete(apple);
+                            if (!giraffe._eatenThisTick) {
+                                apple.onEaten();
+                                tree.onEaten(apple);
+                                giraffe.onEat(this.gameTime);
+                                this.apples.delete(apple);
+                            }
+                            giraffe._eatenThisTick = true;
                         }
                     });
                 }
             });
         });
-        // Game ends after 25 seconds (avoid crashing the tab!)
-        if (this.gameTime > 25000) {
+        // Game ends after 5 minutes (avoid crashing the tab if you forget about it!)
+        if (this.gameTime > 1000 * 60 * 5) {
             this.ticker.stop();
         }
     }
@@ -164,6 +241,15 @@ window.DBG_game = game;
 const e = React.createElement;
 export function Controls() {
     return e("div", {}, [
+        e("div", {}, [
+            "Game speed multiplier: ",
+            e("input", {
+                onChange: (val) => {
+                    let gameSpeed = parseInt(val.currentTarget.value);
+                    game.gameSpeedMultipler = clamp(gameSpeed, 0.5, 10);
+                },
+            }),
+        ]),
         e("div", {}, [
             "Neck length: ",
             e("input", {

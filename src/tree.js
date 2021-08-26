@@ -71,10 +71,17 @@ export class Tree {
         if (this._nextAppleTime === undefined) {
             this._nextAppleTime = 0;
         }
-        this._nextAppleTime += 1000 * (0.5 + Math.random());
+        this._nextAppleTime += 500 * (0.5 + Math.random());
     }
     // Adds an apple to the canopy, and keeps it there if the canopy moves.
     addApple(apple) {
+        if (this.apples.length > 30) {
+            console.log(
+                "Too many apples on this tree, refusing to add more.",
+                tree
+            );
+            return;
+        }
         const canopyGlobalCoords = this.getCanopyRegion();
         apple.canopyOffsetY =
             Math.random() * canopyGlobalCoords.height * 0.6 +
@@ -88,6 +95,9 @@ export class Tree {
     }
     onEaten(apple) {
         this.apples.delete(apple);
+        if (this.onAppleEatenHook) {
+            this.onAppleEatenHook();
+        }
     }
     getApples() {
         return this.apples;
