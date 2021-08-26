@@ -25,6 +25,7 @@ export class Giraffe {
         this.resetEatClock(gameTime);
         this._nextDirectionChangeTime = 0;
         this._applesConsumed = 0;
+        this._nextDirectionChangeTime = gameTime;
         this.resetChangeDirectionClock();
         this.changeDirection();
         this.legs = makeSpriteFromLoadedResource("images/giraffe-legs.png");
@@ -47,6 +48,7 @@ export class Giraffe {
         if (this._applesConsumed === 3) {
             this.mitosis(gameTime);
         }
+        this.reposition();
     }
     getBodyWidth() {
         // Memoize this; apparently it's relatively expensive to calculate.
@@ -68,16 +70,13 @@ export class Giraffe {
         this._direction = direction;
     }
     resetChangeDirectionClock() {
-        if (this._nextDirectionChangeTime === undefined) {
-            this._nextDirectionChangeTime = 0;
-        }
         this._nextDirectionChangeTime += 1000 * (2 + Math.random() * 3);
     }
     resetEatClock(gameTime) {
         if (this._starvationTime === undefined) {
             this._starvationTime = 0;
         }
-        this._starvationTime = gameTime + 8000 + 4000 * Math.random();
+        this._starvationTime = gameTime + 5000 + 5000 * Math.random();
         this._sicklyTime = this._starvationTime * (2 / 3);
     }
     getStarvationTime() {
@@ -139,14 +138,19 @@ export class Giraffe {
         this.head.width = 20;
         this.head.height = 32;
         this.head.anchor.set(0, 1);
+        if (this._direction === -1) {
+            this.body.scale.x = -Math.abs(this.body.scale.x);
+        } else {
+            this.body.scale.x = Math.abs(this.body.scale.x);
+        }
         if (this._sickly) {
             this.head.tint = 0xff0000;
             this.legs.tint = 0xff0000;
             this.neck.tint = 0xff0000;
         } else if (this._mitosis) {
-            this.head.tint = 0x00ff00;
-            this.legs.tint = 0x00ff00;
-            this.neck.tint = 0x00ff00;
+            this.head.tint = 0xff99ff;
+            this.legs.tint = 0xff99ff;
+            this.neck.tint = 0xff99ff;
         } else {
             this.head.tint = 0xffffff;
             this.legs.tint = 0xffffff;

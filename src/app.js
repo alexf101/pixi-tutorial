@@ -75,12 +75,12 @@ class Game {
         this.apples.set(apple, apple);
         tree.addApple(apple);
     }
-    tick(frames) {
-        frames = frames * this.gameSpeedMultipler;
+    tick(rawFrames) {
+        frames = rawFrames * this.gameSpeedMultipler;
         this.gameTime += gameTimeToMilliseconds(frames);
         try {
             document.getElementById("fps-meter").textContent =
-                "FPS: " + Math.round(frames * 60);
+                "FPS: " + Math.round(rawFrames * 60);
             document.getElementById("game-time").textContent =
                 "Game time: " + Math.round(this.gameTime);
             document.getElementById("giraffe-debug").textContent =
@@ -109,7 +109,6 @@ class Game {
             text.y = text.height;
             App.stage.addChild(text);
             this.ticker.stop();
-            // setTimeout(() => this.ticker.stop(), 1);
         }
         // Apples spawn on each tree about once per second
         this.trees.forEach((tree) => {
@@ -133,10 +132,14 @@ class Game {
                             App.stage,
                             this.gameTime
                         );
+                        const plusOrMinusOne = 2 * i - 1;
                         giraffeChild.neckLength =
-                            giraffe.neckLength + 30 * (Math.random() - 0.5);
-                        giraffeChild.addAtPos(giraffe.x, giraffe.y);
-                        giraffe.setDirection(2 * (i % 2) - 1);
+                            giraffe.neckLength + 40 * (Math.random() - 0.5);
+                        giraffeChild.addAtPos(
+                            giraffe.x + plusOrMinusOne * 10,
+                            giraffe.y
+                        );
+                        giraffe.setDirection(plusOrMinusOne);
                         this.giraffes.push(giraffeChild);
                     }
                 });
@@ -188,7 +191,16 @@ class Game {
             }
             // Giraffes may move
             const newX = giraffe.body.x + giraffe.getDirection() * frames;
-            giraffe.x = clamp(newX, 0, App.view.width - giraffe.getBodyWidth());
+            if (giraffe._direction === -1) {
+                // Ergh... I've implemented this with negative scale X, and I can't seem to move the pivot point correctly to offset this.
+                giraffe.x = clamp(newX, giraffe.getBodyWidth(), App.view.width);
+            } else {
+                giraffe.x = clamp(
+                    newX,
+                    0,
+                    App.view.width - giraffe.getBodyWidth()
+                );
+            }
             giraffe.reposition();
             // Giraffes may grow weakened by hunger
             if (giraffe.getSicklyTime() < this.gameTime) {
