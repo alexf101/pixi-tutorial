@@ -60,6 +60,9 @@ export class Giraffe {
     getNextDirectionChangeTime() {
         return this._nextDirectionChangeTime;
     }
+    getHeadRegion() {
+        return this.head.getBounds();
+    }
     addAtPos(x, y) {
         this.x = x;
         this.y = y;

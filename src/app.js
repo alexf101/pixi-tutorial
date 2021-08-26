@@ -99,16 +99,30 @@ class Game {
             );
         });
         // Apple/giraffe collisions result in the giraffe eating the apple
-        // Let's start with the naive O(n^2) algorithm and see how far we get
+        // We can improve slightly upon the naive O(n^2) algorithm by comparing giraffes with tree canopies instead of apples as a first pass.
+
+        // memoize the bounds, this is for some reason a little expensive for Pixi to calculate. We know they're not going to change within this tick.
+        this.trees.forEach(
+            (tree) => (tree._canopyBounds = tree.getCanopyRegion())
+        );
+        const _appleBounds = new Map();
         this.giraffes.forEach((giraffe) => {
-            this.apples.forEach((apple) => {
-                if (
-                    hitTestRectangle(
-                        giraffe.head.getBounds(),
-                        apple.body.getBounds()
-                    )
-                ) {
-                    apple.remove();
+            const giraffeBounds = giraffe.getHeadRegion();
+            this.trees.forEach((tree) => {
+                if (hitTestRectangle(giraffeBounds, tree._canopyBounds)) {
+                    tree.getApples().forEach((apple) => {
+                        if (!_appleBounds.has(apple)) {
+                            _appleBounds.set(apple, apple.body.getBounds());
+                        }
+                        if (
+                            hitTestRectangle(
+                                giraffeBounds,
+                                _appleBounds.get(apple)
+                            )
+                        ) {
+                            apple.remove();
+                        }
+                    });
                 }
             });
         });

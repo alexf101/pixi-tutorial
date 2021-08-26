@@ -86,6 +86,9 @@ export class Tree {
         apple.addAtPos(apple.x, apple.y);
         this.apples.push(apple);
     }
+    getApples() {
+        return this.apples;
+    }
     positionApple(apple, canopyGlobalCoords) {
         apple.body.x = canopyGlobalCoords.x + apple.canopyOffsetX;
         apple.body.y = canopyGlobalCoords.y + apple.canopyOffsetY;
@@ -114,8 +117,8 @@ export class Tree {
         this.canopy.width = 32;
         this.canopy.height = 12;
         this.canopy.anchor.set(0, 1);
+        const canopyGlobalCoords = this.getCanopyRegion();
         this.apples.forEach((apple) => {
-            const canopyGlobalCoords = this.getCanopyRegion();
             this.positionApple(apple, canopyGlobalCoords);
         });
     }
