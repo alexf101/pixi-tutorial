@@ -73,8 +73,10 @@ class Game {
         this.apples.push(apple);
         tree.addApple(apple);
     }
-    tick(delta) {
-        this.gameTime += gameTimeToMilliseconds(delta);
+    tick(frames) {
+        this.gameTime += gameTimeToMilliseconds(frames);
+        document.getElementById("fps-meter").textContent =
+            "FPS: " + Math.round(frames * 60);
         // Apples spawn on each tree about once per second
         this.trees.forEach((tree) => {
             if (tree.getNextAppleTime() < this.gameTime) {
@@ -91,7 +93,7 @@ class Game {
         });
         // Giraffes may move
         this.giraffes.forEach((giraffe) => {
-            const newX = giraffe.body.x + giraffe.getDirection() * delta;
+            const newX = giraffe.body.x + giraffe.getDirection() * frames;
             giraffe.body.x = clamp(
                 newX,
                 0,
@@ -166,5 +168,6 @@ export function Controls() {
                 },
             }),
         ]),
+        e("div", { id: "fps-meter" }, []),
     ]);
 }
