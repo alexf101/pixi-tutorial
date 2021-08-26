@@ -11,7 +11,7 @@ export class Tree {
     }
     constructor(stage) {
         this.stage = stage;
-        this.trunkLength = 16;
+        this.trunkLength = 12;
         this.resetAppleClock();
         this.base = makeSpriteFromLoadedResource("images/tree-base-256.png");
         this.trunk = makeSpriteFromLoadedResource("images/tree-trunk-256.png");
@@ -21,7 +21,7 @@ export class Tree {
         this.body = new PIXI.Container();
         this.x = 0;
         this.y = 0;
-        this.apples = [];
+        this.apples = new Map();
         this.reposition();
         this.body.addChild(this.canopy);
         this.body.addChild(this.trunk);
@@ -84,7 +84,10 @@ export class Tree {
             canopyGlobalCoords.width * 0.2;
         this.positionApple(apple, canopyGlobalCoords);
         apple.addAtPos(apple.x, apple.y);
-        this.apples.push(apple);
+        this.apples.set(apple, apple);
+    }
+    onEaten(apple) {
+        this.apples.delete(apple);
     }
     getApples() {
         return this.apples;
@@ -126,9 +129,7 @@ export class Tree {
         return this.canopy.getBounds();
     }
     remove() {
-        this.stage.removeChild(this.base);
-        this.stage.removeChild(this.trunk);
-        this.stage.removeChild(this.canopy);
+        this.stage.removeChild(this.body);
     }
     refresh() {
         this.remove();

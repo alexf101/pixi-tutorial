@@ -23,6 +23,9 @@ export class Apple {
         this.body.scale.set(0.25, 0.25);
         this.body.anchor.set(0.5, 0.5);
     }
+    onEaten() {
+        this.remove();
+    }
     remove() {
         this.stage.removeChild(this.body);
     }

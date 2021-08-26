@@ -16,7 +16,7 @@ await loadAllResources(...getResources());
 
 class Game {
     constructor() {
-        this.apples = [];
+        this.apples = new Map();
         this.giraffes = [];
         this.trees = [];
         this.makeGiraffes();
@@ -70,13 +70,24 @@ class Game {
     addAppleToTree(tree) {
         // Randomly distribute the apples in the inner regions of the canopy, not right at the edges - it looks better.
         const apple = new Apple(App.stage);
-        this.apples.push(apple);
+        this.apples.set(apple, apple);
         tree.addApple(apple);
     }
     tick(frames) {
         this.gameTime += gameTimeToMilliseconds(frames);
         document.getElementById("fps-meter").textContent =
             "FPS: " + Math.round(frames * 60);
+        document.getElementById("game-time").textContent =
+            "Game time: " + Math.round(this.gameTime);
+        document.getElementById("giraffe-debug").textContent =
+            "Giraffes: " +
+            JSON.stringify(
+                this.giraffes.map(
+                    (g) => `Starves at ${Math.round(g.getStarvationTime())}`
+                ),
+                null,
+                2
+            );
         // Apples spawn on each tree about once per second
         this.trees.forEach((tree) => {
             if (tree.getNextAppleTime() < this.gameTime) {
@@ -84,21 +95,30 @@ class Game {
                 tree.resetAppleClock();
             }
         });
-        // Giraffes change direction randomly
+        // Giraffe-only rules
         this.giraffes.forEach((giraffe) => {
+            if (giraffe.dead) {
+                return;
+            }
+            // Giraffes change direction randomly
             if (giraffe.getNextDirectionChangeTime() < this.gameTime) {
                 giraffe.changeDirection();
                 giraffe.resetChangeDirectionClock();
             }
-        });
-        // Giraffes may move
-        this.giraffes.forEach((giraffe) => {
+            // Giraffes may move
             const newX = giraffe.body.x + giraffe.getDirection() * frames;
             giraffe.body.x = clamp(
                 newX,
                 0,
                 App.view.width - giraffe.getBodyWidth()
             );
+            // Giraffes may starve
+            if (giraffe.getStarvationTime() < this.gameTime) {
+                giraffe.onStarve();
+                // Let's not deletes these - we may want to keep track of dead giraffes for scoring or something.
+                // There shouldn't be so many of them that it causes a problem, though it is a memory leak.
+                giraffe.dead = true;
+            }
         });
         // Apple/giraffe collisions result in the giraffe eating the apple
         // We can improve slightly upon the naive O(n^2) algorithm by comparing giraffes with tree canopies instead of apples as a first pass.
@@ -122,7 +142,10 @@ class Game {
                                 _appleBounds.get(apple)
                             )
                         ) {
-                            apple.remove();
+                            apple.onEaten();
+                            tree.onEaten(apple);
+                            giraffe.onEat(this.gameTime);
+                            this.apples.delete(apple);
                         }
                     });
                 }
@@ -169,5 +192,7 @@ export function Controls() {
             }),
         ]),
         e("div", { id: "fps-meter" }, []),
+        e("div", { id: "game-time" }, []),
+        e("pre", { id: "giraffe-debug" }, []),
     ]);
 }
