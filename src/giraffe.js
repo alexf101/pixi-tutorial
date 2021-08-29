@@ -22,6 +22,7 @@ export class Giraffe {
     constructor(stage, gameTime) {
         this.stage = stage;
         this.neckLength = 16;
+        this._bornAt = gameTime;
         this.resetEatClock(gameTime);
         this._nextDirectionChangeTime = 0;
         this._applesConsumed = 0;
@@ -73,11 +74,14 @@ export class Giraffe {
         this._nextDirectionChangeTime += 1000 * (2 + Math.random() * 3);
     }
     resetEatClock(gameTime) {
+        console.log("resetEatClock", gameTime);
+        this._lastAteAt = gameTime;
         if (this._starvationTime === undefined) {
             this._starvationTime = 0;
         }
-        this._starvationTime = gameTime + 5000 + 5000 * Math.random();
-        this._sicklyTime = this._starvationTime * (2 / 3);
+        const timeTillStarved = 5000 + 5000 * Math.random();
+        this._starvationTime = gameTime + timeTillStarved;
+        this._sicklyTime = gameTime + timeTillStarved * (2 / 3);
     }
     getStarvationTime() {
         return this._starvationTime;

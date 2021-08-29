@@ -53,3 +53,50 @@ export function hitTestRectangle(r1, r2) {
     //`hit` will be either `true` or `false`
     return hit;
 }
+
+const loopDetector = new Set();
+export function deepNaNWatch(objectToWatch) {
+    try {
+        if (loopDetector.has(objectToWatch)) {
+            return objectToWatch;
+        }
+        loopDetector.add(objectToWatch);
+        if (Array.isArray(objectToWatch)) {
+            for (let i = 0; i < objectToWatch.length; i++) {
+                objectToWatch[i] = deepNaNWatch(objectToWatch[i]);
+            }
+            return observeNan(objectToWatch);
+        } else if (objectToWatch instanceof Object) {
+            for (let [key, value] of Object.entries(objectToWatch)) {
+                objectToWatch[key] = deepNaNWatch(value);
+            }
+            return observeNan(objectToWatch);
+        } else {
+            // Not an array or an object
+            return objectToWatch;
+        }
+    } catch (err) {
+        console.log(err);
+        debugger;
+    }
+}
+export function shallowNaNWatch(objectToWatch) {
+    return observeNan(objectToWatch);
+}
+
+function observeNan(obj) {
+    return new Proxy(obj, {
+        set: function (obj, prop, value) {
+            // The default behavior to store the value
+            obj[prop] = value;
+
+            if (Number.isNaN(value)) {
+                debugger;
+                throw new RangeError(`${prop} on ${obj} is NaN`);
+            }
+
+            // Indicate success
+            return true;
+        },
+    });
+}

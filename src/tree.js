@@ -93,10 +93,10 @@ export class Tree {
         apple.addAtPos(apple.x, apple.y);
         this.apples.set(apple, apple);
     }
-    onEaten(apple) {
+    onEaten(apple, giraffe) {
         this.apples.delete(apple);
         if (this.onAppleEatenHook) {
-            this.onAppleEatenHook();
+            this.onAppleEatenHook(apple, giraffe);
         }
     }
     getApples() {
