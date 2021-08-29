@@ -83,6 +83,7 @@ export class Giraffe {
             throw new Error("Invalid direction");
         }
         this._direction = direction;
+        this.reposition();
     }
     resetChangeDirectionClock() {
         this._nextDirectionChangeTime += 1000 * (2 + Math.random() * 3);

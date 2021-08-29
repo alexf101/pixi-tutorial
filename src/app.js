@@ -134,9 +134,7 @@ class Game {
         victoryMessage.x = (App.view.width - victoryMessage.width) / 2;
         victoryMessage.y = victoryMessage.height;
         this.finalScore.addChild(victoryMessage);
-        // Show the winning giraffe
-        this.winningGiraffe.body.x = 50;
-        this.finalScore.addChild(this.winningGiraffe.body);
+        this.highScoreContainer.addChild(this.winningGiraffe.body);
         // Show some info about the winning giraffe
         const linesShownSoFar = [];
         const infoText = (msgText) => {
@@ -181,29 +179,36 @@ class Game {
             )} seconds`
         );
         const button = makeButton("Show family tree", () => {
-            console.log("CLICKED");
             this.highScoreContainer.visible = false;
-            // Show all the ancestors in order of their generation.
-            const gapBetweenGiraffes = 400 / ancestorCount;
-            let nextPos = 20;
-            this.winningGiraffe.eachAncestor((ancestor) => {
-                if (ancestor === this.winningGiraffe) {
-                    return;
-                }
-                ancestor.setDirection(1);
-                ancestor.body.x =
-                    App.view.width - ancestor.getBodyWidth() - nextPos;
-                nextPos += gapBetweenGiraffes;
-                this.familyTreeContainer.addChild(ancestor.body);
-            });
             this.familyTreeContainer.visible = true;
         });
         button.x = App.view.width / 3 + 40;
         button.y = linesShownSoFar.slice(-1)[0].y + 80;
+        const backButton = makeButton("Show info again", () => {
+            this.highScoreContainer.visible = true;
+            this.familyTreeContainer.visible = false;
+        });
+        backButton.x = 150;
+        backButton.y = 68;
+        // Show all the ancestors in order of their generation.
+        const gapBetweenGiraffes = (App.view.width - 96) / ancestorCount;
+        let nextPos = 48;
+        this.winningGiraffe.eachAncestor((ancestor) => {
+            console.log("nextPos: ", nextPos); // XX
+            ancestor.x = nextPos;
+            ancestor.setDirection(1);
+            nextPos += gapBetweenGiraffes;
+            this.familyTreeContainer.addChild(ancestor.body);
+        });
+        // Show the winning giraffe
+        this.winningGiraffe.x = 48;
+        this.winningGiraffe.setDirection(1);
+        this.finalScore.addChild(this.winningGiraffe.body);
+        this.familyTreeContainer.addChild(backButton);
         this.highScoreContainer.addChild(button);
         this.finalScore.addChild(this.highScoreContainer);
-        App.stage.addChild(this.finalScore);
         this.finalScore.addChild(this.familyTreeContainer);
+        App.stage.addChild(this.finalScore);
     }
     play() {
         // Apples spawn on each tree about once per second
