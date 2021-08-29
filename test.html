@@ -1,10 +1,6 @@
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Hello World</title>
-    </head>
     <body>
-        <script src="vendor/pixi.js"></script>
+        <script src="/vendor/pixi.js"></script>
         <script
             src="https://unpkg.com/react@17/umd/react.development.js"
             crossorigin
@@ -14,7 +10,7 @@
             crossorigin
         ></script>
         <script type="module">
-            import { App, game, Controls } from "./src/app.js";
+            import { App, Controls } from "./src/app.js";
             let type = "WebGL";
             if (!PIXI.utils.isWebGLSupported()) {
                 type = "canvas";
@@ -26,7 +22,11 @@
             document.body.appendChild(App.view);
             document.body.appendChild(reactDiv);
             ReactDOM.render(Controls(), reactDiv);
-            game.start();
+            // Tests
+            import giraffeTest from "/test/giraffe.test.js";
+            const output = document.createElement("pre");
+            document.body.appendChild(output);
+            giraffeTest(output);
         </script>
     </body>
 </html>

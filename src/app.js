@@ -5,11 +5,11 @@ import { Apple } from "./apple.js";
 import { getResources } from "./register.js";
 import {
     clamp,
-    deepNaNWatch,
     gameTimeToMilliseconds,
     hitTestRectangle,
     shallowNaNWatch,
 } from "./util.js";
+import { makeButton } from "./button.js";
 
 //Create a Pixi Application
 export const App = new PIXI.Application({
@@ -32,8 +32,10 @@ class Game {
         this.makeTrees();
         this.makeApples();
         this.makeGreatTree();
-        this.ticker = App.ticker.add(this.tick.bind(this));
         App.stage.addChild(this.playScene);
+    }
+    start() {
+        this.ticker = App.ticker.add(this.tick.bind(this));
     }
     makeGiraffes() {
         for (let i = 0; i < 10; i++) {
@@ -97,8 +99,10 @@ class Game {
             console.log(err);
         }
         if (this.win) {
-            this.showScore();
-            this.ticker.stop();
+            if (this.playScene.visible) {
+                this.showScore();
+            }
+            // this.ticker.stop();
         } else if (this.giraffes.filter((g) => !g.dead).length === 0) {
             let text = new PIXI.Text("All the giraffes died! :(", {
                 fontFamily: "Arial",
@@ -109,7 +113,7 @@ class Game {
             text.x = (App.view.width - text.width) / 2;
             text.y = text.height;
             this.playScene.addChild(text);
-            this.ticker.stop();
+            // this.ticker.stop();
         } else {
             this.play();
         }
@@ -117,6 +121,9 @@ class Game {
     showScore() {
         this.playScene.visible = false;
         this.finalScore = new PIXI.Container();
+        this.highScoreContainer = new PIXI.Container();
+        this.familyTreeContainer = new PIXI.Container();
+        this.familyTreeContainer.visible = false;
         const victoryMessage = new PIXI.Text("Congratulations! You win! :)", {
             fontFamily: "Arial",
             fontSize: 24,
@@ -144,7 +151,7 @@ class Game {
             msg.x = App.view.width / 3;
             msg.y =
                 3 * victoryMessage.height + linesShownSoFar.length * msg.height;
-            this.finalScore.addChild(msg);
+            this.highScoreContainer.addChild(msg);
             linesShownSoFar.push(msg);
         };
         infoText(
@@ -165,19 +172,38 @@ class Game {
                 1
             )} seconds`
         );
-        infoText(
-            `  • the child of ${Giraffe.Generations(
-                this.winningGiraffe,
-                this.giraffes
-            )} generations`
-        );
+        const ancestorCount = this.winningGiraffe.countAncestors();
+        infoText(`  • the child of ${ancestorCount} generations`);
         infoText(
             `  • ate the Great Apple at ${roundTo(
                 this.winningGiraffe._lastAteAt / 1000,
                 1
             )} seconds`
         );
+        const button = makeButton("Show family tree", () => {
+            console.log("CLICKED");
+            this.highScoreContainer.visible = false;
+            // Show all the ancestors in order of their generation.
+            const gapBetweenGiraffes = 400 / ancestorCount;
+            let nextPos = 20;
+            this.winningGiraffe.eachAncestor((ancestor) => {
+                if (ancestor === this.winningGiraffe) {
+                    return;
+                }
+                ancestor.setDirection(1);
+                ancestor.body.x =
+                    App.view.width - ancestor.getBodyWidth() - nextPos;
+                nextPos += gapBetweenGiraffes;
+                this.familyTreeContainer.addChild(ancestor.body);
+            });
+            this.familyTreeContainer.visible = true;
+        });
+        button.x = App.view.width / 3 + 40;
+        button.y = linesShownSoFar.slice(-1)[0].y + 80;
+        this.highScoreContainer.addChild(button);
+        this.finalScore.addChild(this.highScoreContainer);
         App.stage.addChild(this.finalScore);
+        this.finalScore.addChild(this.familyTreeContainer);
     }
     play() {
         // Apples spawn on each tree about once per second
@@ -209,7 +235,7 @@ class Game {
                             giraffe.x - plusOrMinusOne * 10,
                             giraffe.y
                         );
-                        giraffeChild._parent = giraffe;
+                        giraffeChild.setParent(giraffe);
                         giraffe.setDirection(plusOrMinusOne);
                         this.giraffes.push(giraffeChild);
                     }
@@ -318,7 +344,7 @@ class Game {
         }
     }
 }
-const game = shallowNaNWatch(new Game());
+export const game = shallowNaNWatch(new Game());
 window.DBG_game = game;
 
 function showDebugOutput(game, rawFrames) {
