@@ -115,16 +115,68 @@ class Game {
         }
     }
     showScore() {
+        this.playScene.visible = false;
         this.finalScore = new PIXI.Container();
-        let text = new PIXI.Text("Congratulations! You win! :)", {
+        const victoryMessage = new PIXI.Text("Congratulations! You win! :)", {
             fontFamily: "Arial",
             fontSize: 24,
             fill: 0xffff10,
             align: "center",
+            fontWeight: "bold",
         });
-        text.x = (App.view.width - text.width) / 2;
-        text.y = text.height;
-        this.finalScore.addChild(text);
+        victoryMessage.x = (App.view.width - victoryMessage.width) / 2;
+        victoryMessage.y = victoryMessage.height;
+        this.finalScore.addChild(victoryMessage);
+        // Show the winning giraffe
+        this.winningGiraffe.body.x = 50;
+        this.finalScore.addChild(this.winningGiraffe.body);
+        // Show some info about the winning giraffe
+        const linesShownSoFar = [];
+        const infoText = (msgText) => {
+            const msg = new PIXI.Text(msgText, {
+                fontFamily: "Arial",
+                fontSize: 18,
+                fill: 0x87cefa,
+                align: "left",
+                fontWeight: "bold",
+            });
+            msg.resolution = 2;
+            msg.x = App.view.width / 3;
+            msg.y =
+                3 * victoryMessage.height + linesShownSoFar.length * msg.height;
+            this.finalScore.addChild(msg);
+            linesShownSoFar.push(msg);
+        };
+        infoText(
+            `Total apples eaten: ${this.giraffes.reduce((soFar, g) => {
+                if (typeof g._applesConsumed === "number") {
+                    return soFar + g._applesConsumed;
+                } else {
+                    return soFar;
+                }
+            }, 0)}`
+        );
+        infoText("");
+        infoText("Your winning Giraffe was:");
+        infoText("");
+        infoText(
+            `  • born at ${roundTo(
+                this.winningGiraffe._bornAt / 1000,
+                1
+            )} seconds`
+        );
+        infoText(
+            `  • the child of ${Giraffe.Generations(
+                this.winningGiraffe,
+                this.giraffes
+            )} generations`
+        );
+        infoText(
+            `  • ate the Great Apple at ${roundTo(
+                this.winningGiraffe._lastAteAt / 1000,
+                1
+            )} seconds`
+        );
         App.stage.addChild(this.finalScore);
     }
     play() {
@@ -279,7 +331,7 @@ function showDebugOutput(game, rawFrames) {
         JSON.stringify(
             game.giraffes.map(
                 (g) =>
-                    `Born at ${g._bornAt}. Late ate at ${Math.round(
+                    `Born at ${g._bornAt}. Last ate at ${Math.round(
                         g._lastAteAt
                     )}. Hungry at ${Math.round(
                         g.getSicklyTime()
@@ -291,7 +343,10 @@ function showDebugOutput(game, rawFrames) {
             2
         );
 }
-
+function roundTo(t, precision) {
+    let factor = 10 ** precision;
+    return Math.round(t * factor) / factor;
+}
 const e = React.createElement;
 export function Controls() {
     return e("div", {}, [

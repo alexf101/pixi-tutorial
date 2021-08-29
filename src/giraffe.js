@@ -19,6 +19,12 @@ export class Giraffe {
             "images/giraffe-neck.png",
         ];
     }
+    static Generations(giraffe) {
+        if (!giraffe._parent) {
+            return 1;
+        }
+        return Giraffe.Generations(giraffe._parent) + 1;
+    }
     constructor(stage, gameTime) {
         this.stage = stage;
         this.neckLength = 16;
@@ -74,7 +80,6 @@ export class Giraffe {
         this._nextDirectionChangeTime += 1000 * (2 + Math.random() * 3);
     }
     resetEatClock(gameTime) {
-        console.log("resetEatClock", gameTime);
         this._lastAteAt = gameTime;
         if (this._starvationTime === undefined) {
             this._starvationTime = 0;
