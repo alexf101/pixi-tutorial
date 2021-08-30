@@ -94,7 +94,9 @@ class Game {
         frames = rawFrames * this.gameSpeedMultipler;
         this.gameTime += gameTimeToMilliseconds(frames);
         try {
-            showDebugOutput(this, rawFrames);
+            if (window.DEBUG_MODE) {
+                showDebugOutput(this, rawFrames);
+            }
         } catch (err) {
             console.log(err);
         }
@@ -386,11 +388,15 @@ export function Controls() {
             e("input", {
                 onChange: (val) => {
                     let gameSpeed = parseInt(val.currentTarget.value);
-                    game.gameSpeedMultipler = clamp(gameSpeed, 0.5, 10);
+                    if (typeof gameSpeed === 'number' && !Number.isNaN(gameSpeed)) {
+                        game.gameSpeedMultipler = clamp(gameSpeed, 0.5, 10);
+                    } else {
+                        game.gameSpeedMultipler = 1;
+                    }
                 },
             }),
         ]),
-        e("div", {}, [
+        window.DEBUG_MODE && ("div", {}, [
             "Neck length: ",
             e("input", {
                 onChange: (val) => {
@@ -402,7 +408,7 @@ export function Controls() {
                 },
             }),
         ]),
-        e("div", {}, [
+        window.DEBUG_MODE && ("div", {}, [
             "Trunk length: ",
             e("input", {
                 onChange: (val) => {

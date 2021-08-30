@@ -19,11 +19,23 @@
             if (!PIXI.utils.isWebGLSupported()) {
                 type = "canvas";
             }
-            const reactDiv = document.createElement("div");
-            reactDiv.id = "#react";
             PIXI.utils.sayHello(type);
             //Add the canvas that Pixi automatically created for you to the HTML document
             document.body.appendChild(App.view);
+        </script>
+        <div>
+            <h1>Welcome to Giraffe!</h1>
+            <p>The Giraffe's will mitosis if they eat three apples</p>
+            <p>When they mitosis, they disappear and two new giraffe's appear in their place. The new giraffe's have a randomly generated neck length in the vicinity of their parent.</p>
+            <p>When Giraffe's do not eat for awhile, they turn red. A short while later, they will disappear.</p>
+            <p>You can adjust the height of each tree by clicking and dragging it by its canopy.</p>
+            <p>You win if you can coax a giraffe to eat an apple for the Great Tree, the large tree in the middle. You lose if all the giraffe's die.</p>
+            <p>In this way, we see the processes of evolution - natural selection and random variation - at work.</p>
+        </div>
+        <script type="module">
+            import { App, game, Controls } from "./src/app.js";
+            const reactDiv = document.createElement("div");
+            reactDiv.id = "#react";
             document.body.appendChild(reactDiv);
             ReactDOM.render(Controls(), reactDiv);
             game.start();
