@@ -1,0 +1,2 @@
+#!/bin/bash
+rsync -r --delete --exclude run --exclude publish --exclude image-originals --cvs-exclude . ../alexf101.github.io/pixi-tutorial
