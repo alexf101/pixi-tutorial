@@ -90,12 +90,34 @@ class Game {
         this.apples.set(apple, apple);
         tree.addApple(apple);
     }
+    sendDebugOutput(game, rawFrames) {
+        const dbgOutput = {};
+        dbgOutput.fps = Math.round(rawFrames * 60);
+        dbgOutput.gameTime = Math.round(game.gameTime);
+        dbgOutput.giraffeState = JSON.stringify(
+            game.giraffes.map(
+                (g) =>
+                    `Born at ${g._bornAt}. Last ate at ${Math.round(
+                        g._lastAteAt
+                    )}. Hungry at ${Math.round(
+                        g.getSicklyTime()
+                    )}. Starves at ${Math.round(
+                        g.getStarvationTime()
+                    )}. Apples eaten: ${g._applesConsumed}`
+            ),
+            null,
+            2
+        );
+        if (this.onDebugOutput) {
+            this.onDebugOutput(dbgOutput);
+        }
+    }
     tick(rawFrames) {
         frames = rawFrames * this.gameSpeedMultipler;
         this.gameTime += gameTimeToMilliseconds(frames);
         try {
             if (window.DEBUG_MODE) {
-                showDebugOutput(this, rawFrames);
+                this.sendDebugOutput(this, rawFrames);
             }
         } catch (err) {
             console.log(err);
@@ -196,7 +218,6 @@ class Game {
         const gapBetweenGiraffes = (App.view.width - 96) / ancestorCount;
         let nextPos = 48;
         this.winningGiraffe.eachAncestor((ancestor) => {
-            console.log("nextPos: ", nextPos); // XX
             ancestor.x = nextPos;
             ancestor.setDirection(1);
             nextPos += gapBetweenGiraffes;
@@ -354,78 +375,92 @@ class Game {
 export const game = shallowNaNWatch(new Game());
 window.DBG_game = game;
 
-function showDebugOutput(game, rawFrames) {
-    document.getElementById("fps-meter").textContent =
-        "FPS: " + Math.round(rawFrames * 60);
-    document.getElementById("game-time").textContent =
-        "Game time: " + Math.round(game.gameTime);
-    document.getElementById("giraffe-debug").textContent =
-        "Giraffes: " +
-        JSON.stringify(
-            game.giraffes.map(
-                (g) =>
-                    `Born at ${g._bornAt}. Last ate at ${Math.round(
-                        g._lastAteAt
-                    )}. Hungry at ${Math.round(
-                        g.getSicklyTime()
-                    )}. Starves at ${Math.round(
-                        g.getStarvationTime()
-                    )}. Apples eaten: ${g._applesConsumed}`
-            ),
-            null,
-            2
-        );
-}
 function roundTo(t, precision) {
     let factor = 10 ** precision;
     return Math.round(t * factor) / factor;
 }
 const e = React.createElement;
-export function Controls() {
-    return e("div", {}, [
-        e("div", {}, [
-            "Game speed multiplier: ",
-            e("input", {
-                onChange: (val) => {
-                    let gameSpeed = parseInt(val.currentTarget.value);
-                    if (typeof gameSpeed === 'number' && !Number.isNaN(gameSpeed)) {
-                        game.gameSpeedMultipler = clamp(gameSpeed, 0.5, 10);
-                    } else {
-                        game.gameSpeedMultipler = 1;
-                    }
+export class Controls extends React.Component {
+    state = {
+        fps: 0,
+        gameTime: 0,
+        giraffeState: "",
+    };
+    render() {
+        game.onDebugOutput = (dbgOutput) => {
+            this.setState({
+                fps: dbgOutput.fps,
+                gameTime: dbgOutput.gameTime,
+                giraffeState: dbgOutput.giraffeState,
+            });
+        };
+        return e("div", {}, [
+            e("div", {}, [
+                "Game speed multiplier: ",
+                e("input", {
+                    onChange: (val) => {
+                        let gameSpeed = parseInt(val.currentTarget.value);
+                        if (
+                            typeof gameSpeed === "number" &&
+                            !Number.isNaN(gameSpeed)
+                        ) {
+                            game.gameSpeedMultipler = clamp(gameSpeed, 0.5, 10);
+                        } else {
+                            game.gameSpeedMultipler = 1;
+                        }
+                    },
+                }),
+            ]),
+            e(
+                "button",
+                {
+                    onClick: () => {
+                        this.setState({});
+                        window.DEBUG_MODE = !window.DEBUG_MODE;
+                    },
                 },
-            }),
-        ]),
-        window.DEBUG_MODE && ("div", {}, [
-            "Neck length: ",
-            e("input", {
-                onChange: (val) => {
-                    let neckLength = parseInt(val.currentTarget.value);
-                    game.giraffes.forEach((g) => {
-                        g.neckLength = neckLength;
-                        g.reposition();
-                    });
-                },
-            }),
-        ]),
-        window.DEBUG_MODE && ("div", {}, [
-            "Trunk length: ",
-            e("input", {
-                onChange: (val) => {
-                    let trunkLength = parseInt(val.currentTarget.value);
-                    game.apples.forEach((a) => {
-                        a.remove();
-                    });
-                    game.trees.forEach((t) => {
-                        t.trunkLength = trunkLength;
-                        t.reposition();
-                    });
-                    game.makeApples();
-                },
-            }),
-        ]),
-        e("div", { id: "fps-meter" }, []),
-        e("div", { id: "game-time" }, []),
-        e("pre", { id: "giraffe-debug" }, []),
-    ]);
+                ["Toggle debug mode"]
+            ),
+            window.DEBUG_MODE &&
+                e("div", {}, [
+                    "Neck length: ",
+                    e("input", {
+                        onChange: (val) => {
+                            let neckLength = parseInt(val.currentTarget.value);
+                            game.giraffes.forEach((g) => {
+                                g.neckLength = neckLength;
+                                g.reposition();
+                            });
+                        },
+                    }),
+                ]),
+            window.DEBUG_MODE &&
+                e("div", {}, [
+                    "Trunk length: ",
+                    e("input", {
+                        onChange: (val) => {
+                            let trunkLength = parseInt(val.currentTarget.value);
+                            game.apples.forEach((a) => {
+                                a.remove();
+                            });
+                            game.trees.forEach((t) => {
+                                t.trunkLength = trunkLength;
+                                t.reposition();
+                            });
+                            game.makeApples();
+                        },
+                    }),
+                ]),
+            window.DEBUG_MODE &&
+                e("div", { id: "fps-meter" }, ["FPS: " + this.state.fps]),
+            window.DEBUG_MODE &&
+                e("div", { id: "game-time" }, [
+                    "Game time: " + this.state.gameTime,
+                ]),
+            window.DEBUG_MODE &&
+                e("pre", { id: "giraffe-debug" }, [
+                    "Giraffes: " + this.state.giraffeState,
+                ]),
+        ]);
+    }
 }

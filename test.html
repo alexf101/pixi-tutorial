@@ -21,7 +21,7 @@
             //Add the canvas that Pixi automatically created for you to the HTML document
             document.body.appendChild(App.view);
             document.body.appendChild(reactDiv);
-            ReactDOM.render(Controls(), reactDiv);
+            ReactDOM.render(new Controls(), reactDiv);
             // Tests
             import giraffeTest from "/test/giraffe.test.js";
             const output = document.createElement("pre");
